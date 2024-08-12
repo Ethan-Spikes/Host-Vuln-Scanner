@@ -1,0 +1,75 @@
+#!/bin/bash
+
+#how to tell exposed ports?
+
+#version 1.5
+
+P_Scan='n'
+V_Scan='n'
+
+
+Root_Check() { #good
+
+	user=$(whoami)
+	if [ $user != root ]; then
+		echo 'Permission denied.'
+		echo ' '
+		exit
+	fi
+
+}
+
+Update_Tools() {
+	
+	echo "is it ok if we upgrade the tools this script uses?(y/n)"
+	read upgrade
+	if [ $upgrade == 'y' ];then
+		sudo apt update
+		sudo apt upgrade nmap
+		sudo apt autoremove
+		sudo apt autoclean
+		nmap --script-updatedb
+	fi
+	
+
+}
+
+Set_Variables() {
+
+	echo ' '
+	echo "would you like to scan your host for open ports (y/n)?"
+	read P_Scan
+	echo ' '
+	if [ $P_Scan == 'y' ]; then
+		echo "would you like to scan your host for vulnerabilities as well (y/n)?"
+		read V_Scan
+		echo ' '
+	fi
+	
+}
+
+Scan_Yourself() {
+
+	if [ $V_Scan == 'y' ]; then
+		sudo nmap --script vuln -p- 127.0.0.1
+	elif [ $P_Scan == 'y' ]; then
+		sudo nmap -p- 127.0.0.1
+		
+	fi
+
+
+}
+
+Main() {
+
+	Root_Check
+	Update_Tools
+	Set_Variables
+	Scan_Yourself
+
+	echo "script completed. exiting"
+	exit
+
+}
+
+Main
